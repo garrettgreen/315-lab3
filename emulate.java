@@ -6,7 +6,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.Map.Entry;
+
 public class emulate {
+
+    public static int[] datamemory = new int[8192];
+    public static int pc = 0;
 
     // This function finds and maps labels in the code 
     public static HashMap<String, Integer> mapLabels(String fname){
@@ -168,8 +172,6 @@ public class emulate {
 
     
     public static void main(String[] args){
-        int[] datamemory = new int[8192];
-        int pc = 0;
 
         System.out.println(args.length);
 
@@ -218,24 +220,39 @@ public class emulate {
                         }
                     }
                     else if (userIn[0].equals("s")){
-                        instrOp operation = new instrOp(asmarray[pc], labelMap, registers);
-                        registers = operation.execute_instruction();
-                        // single step through instructions
-                        pc++;
-                        System.out.println("1 instruction completed.");
+                        if (pc < asmarray.length){
+                            instrOp operation = new instrOp(asmarray[pc], labelMap, registers);
+                            registers = operation.execute_instruction();
+                            // single step through instructions
+                            pc++;
+                            System.out.println("1 instruction completed.");
+                        }
+                        else {
+                            System.out.println("Program Completed. Please clear.");
+                        }
                     }
                     else if (userIn[0].equals("r")){
                         // run whole program
-                        for (String line : asmarray){
-                            instrOp operation = new instrOp(line, labelMap, registers);
+                        int count = 0;
+                        while (pc < asmarray.length) {
+                            instrOp operation = new instrOp(asmarray[pc], labelMap, registers);
                             registers = operation.execute_instruction();
+                            pc++;
+                            count++;
                         }
+                        System.out.println("Program Completed. Please clear.");
+                        System.out.println(count + " instruction(s) completed.");            
                     }
+
                     else if (userIn[0].equals("c")){
                         // clear registers, memory (pc == 0)
                         for (Entry<String, Integer> entry : registers.entrySet()) {
                             entry.setValue(0);
                         }
+                        for (int i = 0; i < datamemory.length; i++) {
+                            datamemory[i] = 0;
+                        }
+                        pc = 0;
                     }
                     else if (userIn[0].equals("q")){
                         // exit program 
@@ -245,14 +262,25 @@ public class emulate {
                     // code for s num
                     int count = 0;
                     while (count < Integer.parseInt(userIn[1])){
-                        instrOp operation = new instrOp(asmarray[pc], labelMap, registers);
-                        registers = operation.execute_instruction();
-                        pc++;
-                        count++;         
+                        if (pc < asmarray.length){ 
+                            instrOp operation = new instrOp(asmarray[pc], labelMap, registers);
+                            registers = operation.execute_instruction();
+                            pc++;
+                            count++;
+                        }
+                        else {
+                            System.out.println("Reached the end of program. Please clear.");
+                            count = Integer.parseInt(userIn[1]);
+                        }       
                     }
                     System.out.println(userIn[1] + "instruction(s) completed.");
-                } else if (userIn.length == 3){
+                } else if (userIn.length == 3 && userIn[0].equals("m")){
                     // code for m num1 num2
+                    int lower = Integer.parseInt(userIn[1]);
+                    int upper = Integer.parseInt(userIn[2]);
+                    for (int i = lower; i <= upper; i++) {
+                        System.out.println("[" + i + "] = " + datamemory[i]);
+                    }
                 }
             }
         }

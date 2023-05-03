@@ -1,5 +1,3 @@
-
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -10,14 +8,14 @@ public class instrOp {
     private HashMap<String, Integer> labelMap;
     private String instruction;
     private int pc;
-    private int datamemory[];
+    // private int datamemory[];
 
     public instrOp(String instruction, HashMap<String, Integer> labelMap, HashMap<String, Integer> registers){
         this.labelMap = labelMap;
         this.instruction = instruction;
         this.registers = registers;
         this.pc = 0;
-        this.datamemory = new int[8192];
+        //this.datamemory = datamemory;
     }
 
     public int get_register(String name){
@@ -39,9 +37,6 @@ public class instrOp {
     public HashMap<String, Integer> execute_instruction(){
         String arr[] = instruction.trim().split("\\s+");
         String instName = arr[0];
-        for (String line : arr){
-            System.out.println(line);
-        }
 
         System.out.println("This is the instr going to be compelte: " + arr[0]);
 
@@ -89,8 +84,8 @@ public class instrOp {
         else if (instName.equals("sll")){
             String destination = arr[1];
             int reg1 = get_register(arr[2]);
-            int reg2 = Integer.parseInt(arr[3]);
-            int finnal = reg1 << reg2;
+            int imm = Integer.parseInt(arr[3]);
+            int finnal = reg1 << imm;
             set_register(destination, finnal);
         }
         else if (instName.equals("slt")){
@@ -108,56 +103,48 @@ public class instrOp {
         }
         else if (instName.equals("sw")){
             int value = get_register(arr[1]);
-            String[] offset = arr[2].split("//(");
-            int num = Integer.parseInt(offset[0]);
-            String reg1 = offset[1].substring(1, offset[1].length() - 1);
-            int memoryLoc = get_register(reg1) + num;
-            datamemory[memoryLoc] = value; 
+            int offset = Integer.parseInt(arr[2]);
+            String reg1 = arr[3];
+            int memoryLoc = get_register(reg1) + offset;
+            emulate.datamemory[memoryLoc] = value; 
         }
         else if (instName.equals("lw")){
             String destination = arr[1];
-            String[] offset = arr[2].split("//(");
-            int num = Integer.parseInt(offset[0]);
-            String reg1 = offset[1].substring(1, offset[1].length() - 1);
-            int memoryLoc = get_register(reg1) + num;
-            int value = datamemory[memoryLoc];
+            int offset = Integer.parseInt(arr[2]);
+            String reg1 = arr[3];
+            int memoryLoc = get_register(reg1) + offset;
+            int value = emulate.datamemory[memoryLoc];
             set_register(destination, value);
         }
         else if (instName.equals("bne")){
             int reg1 = get_register(arr[1]);
             int reg2 = get_register(arr[2]);
-            String labelname = arr[3];
             if (reg1 != reg2){
-                // set pc to label location (should we have access to label map in system?)
+                emulate.pc = labelMap.get(arr[3]) - 1; // -1 because completing this instruction pc++
             }
 
         }
         else if (instName.equals("beq")){
             int reg1 = get_register(arr[1]);
             int reg2 = get_register(arr[2]);
-            String labelname = arr[3];
             if (reg1 == reg2){
-                // set pc to label location (should we have access to label map in system?)
-                // set_pc(label address)
+                emulate.pc = labelMap.get(arr[3]) - 1; // -1 because completing this instruction pc++
             }
 
         }
         else if (instName.equals("j")){
-            String location = arr[1];
-            int address = Integer.parseInt(location);
-            set_pc(address);
+            int address = labelMap.get(arr[1]);
+            emulate.pc = address - 1; // -1 because completing this instruction pc++
         }
         else if (instName.equals("jr")){
-            String location = arr[1];
-            int address = get_register(location);
-            set_pc(address);
+            int address = get_register(arr[1]);
+            emulate.pc = address - 1; // -1 because completing this instruction pc++
         }
         else if (instName.equals("jal")){
-            String location = arr[1];
-            int address = get_register(location);
+            int address = get_register(arr[1]);
             // set pc to $ra first, then set pc
-            set_register("$ra", get_pc());
-            set_pc(address);
+            set_register("$ra", emulate.pc);
+            emulate.pc = address - 1; // -1 because completing this instruction pc++
         }
         
         return registers;
