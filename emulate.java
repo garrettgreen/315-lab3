@@ -1,7 +1,9 @@
-package lab3;
-
 // Garrett Green
 // Logan Schwarz
+
+package lab3;
+
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -364,7 +366,7 @@ public class emulate {
                         for (Entry<String, Integer> entry : registers.entrySet()) {
                             entry.setValue(0);
                         }
-                        for (int j = 0; i < datamemory.length; j++) {
+                        for (int j = 0; j < datamemory.length; j++) {
                             datamemory[j] = 0;
                         }
                         pc = 0;
