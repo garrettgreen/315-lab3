@@ -1,7 +1,13 @@
+package lab3;
+
 // Garrett Green
 // Logan Schwarz
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -171,17 +177,17 @@ public class emulate {
     }
 
     
-    public static void main(String[] args){
+    public static void main(String[] args) throws FileNotFoundException, IOException{
 
         System.out.println(args.length);
 
-        String[] asmarray = readASM("inputtest.asm");
+        String[] asmarray = readASM(args[0]);
 
         for (String line : asmarray){
             System.out.println(line);
         }
         
-        HashMap<String, Integer> labelMap = mapLabels("inputtest.asm");
+        HashMap<String, Integer> labelMap = mapLabels(args[0]);
 
         System.out.println("Label Table:");
         for (Entry<String, Integer> entry : labelMap.entrySet()) {
@@ -191,7 +197,7 @@ public class emulate {
         HashMap<String, Integer> registers = createRegistersMap();
 
         // registers are null going into this 
-        if (args.length == 0) {
+        if (args.length == 1) {
             // interactive
             Scanner scanner = new Scanner(System.in);
 
@@ -284,15 +290,116 @@ public class emulate {
                 }
             }
         }
-        else if (args.length == 1){
+        else if (args.length == 2){
             // script
-            String filename = args[0];
+            String filename = args[1];
             File script = new File(filename);
 
             if (!script.isFile() || !script.exists()){
                 System.out.print("Unable to open given file\n");
                 return;
             }
+            ArrayList<ArrayList<String>> lines = new ArrayList<>(); 
+
+            try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+                String line;
+    
+                while ((line = br.readLine()) != null) {
+                    String[] splitLine = line.split(" "); 
+                    ArrayList<String> words = new ArrayList<>(); // initialize ArrayList to hold words
+                    for (String word : splitLine) {
+                        words.add(word); // add each word to ArrayList
+                    }
+                    lines.add(words); // add ArrayList of words to ArrayList of lines
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            for (int i = 0; i < lines.size(); i++){
+                if (lines.get(i).size() == 1){
+                    String first = lines.get(i).get(0);
+                    if (first.equals("h")){
+                        System.out.println("List of commands:\n" +
+                                           "h = show help\n" + 
+                                           "d = dump register state\n" +
+                                           "s = single step through the program (i.e. execute 1 instruction and stop) s num = step through num instructions of the program\n" +
+                                           "r = run until the program ends\n" +
+                                           "m num1 num2 = display data memory from location num1 to num2\n" +
+                                           "c = clear all registers, memory, and the program counter to 0\n" +
+                                           "q = exit the program");
+
+                    }
+                    else if (first.equals("d")){
+                        // dump registers
+                        for (Entry<String, Integer> entry : registers.entrySet()) {
+                            System.out.println(entry.getKey() + " = " + entry.getValue());
+                        }
+                    }
+                    else if (first.equals("s")){
+                        if (pc < asmarray.length){
+                            instrOp operation = new instrOp(asmarray[pc], labelMap, registers);
+                            registers = operation.execute_instruction();
+                            // single step through instructions
+                            pc++;
+                            System.out.println("1 instruction completed.");
+                        }
+                        else {
+                            System.out.println("Program Completed. Please clear.");
+                        }
+                    }
+                    else if (first.equals("r")){
+                        int count = 0;
+                        while (pc < asmarray.length) {
+                            instrOp operation = new instrOp(asmarray[pc], labelMap, registers);
+                            registers = operation.execute_instruction();
+                            pc++;
+                            count++;
+                        }
+                        System.out.println("Program Completed. Please clear.");
+                        System.out.println(count + " instruction(s) completed.");
+                    }
+                    else if(first.equals("c")){
+                        // clear registers, memory (pc == 0)
+                        for (Entry<String, Integer> entry : registers.entrySet()) {
+                            entry.setValue(0);
+                        }
+                        for (int j = 0; i < datamemory.length; j++) {
+                            datamemory[j] = 0;
+                        }
+                        pc = 0;
+                    }
+                    else if (first.equals("q")){
+                        // exit program 
+                        System.exit(0);
+                    }
+                }
+                else if (lines.get(i).size() == 2 && lines.get(i).get(0).equals("s")){
+                    int instrNum = Integer.parseInt(lines.get(i).get(1));
+                    int count = 0;
+                    while (count < instrNum){
+                        if (pc < asmarray.length){ 
+                            instrOp operation = new instrOp(asmarray[pc], labelMap, registers);
+                            registers = operation.execute_instruction();
+                            pc++;
+                            count++;
+                        }
+                        else {
+                            System.out.println("Reached the end of program. Please clear.");
+                            count = instrNum;
+                        }       
+                    }
+                    System.out.println(instrNum + "instruction(s) completed.");
+                }
+                else if(lines.get(i).size() == 3 && lines.get(i).get(0).equals("m")){
+                    int lower = Integer.parseInt(lines.get(i).get(1));
+                    int upper = Integer.parseInt(lines.get(i).get(2));
+                    for (int k = lower; k <= upper; k++) {
+                        System.out.println("[" + k + "] = " + datamemory[k]);
+                    }
+                }
+            }
+
         }
         else{
             System.out.println("Incorrect arguments passed!");
