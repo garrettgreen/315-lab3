@@ -1,9 +1,5 @@
 // Garrett Green
 // Logan Schwarz
-
-package lab3;
-
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -181,30 +177,33 @@ public class emulate {
     
     public static void main(String[] args) throws FileNotFoundException, IOException{
 
-        System.out.println(args.length);
+        //System.out.println(args.length);
 
         String[] asmarray = readASM(args[0]);
 
+        /*
         for (String line : asmarray){
             System.out.println(line);
         }
-        
+        */
+
         HashMap<String, Integer> labelMap = mapLabels(args[0]);
 
+        /* 
         System.out.println("Label Table:");
         for (Entry<String, Integer> entry : labelMap.entrySet()) {
             System.out.println(entry.getKey() + " = " + entry.getValue());
         }
+        */
 
         HashMap<String, Integer> registers = createRegistersMap();
-
+    
         // registers are null going into this 
         if (args.length == 1) {
             // interactive
             Scanner scanner = new Scanner(System.in);
 
             while (true) {
-                System.out.println("pc: " + pc);
                 System.out.print("mips> ");
                 String input = scanner.nextLine();
                 String[] userIn = input.split(" ");
@@ -223,8 +222,15 @@ public class emulate {
                     }
                     else if (userIn[0].equals("d")){
                         // dump registers
+                        System.out.println("pc = " + pc);
+                        int count = 1;
                         for (Entry<String, Integer> entry : registers.entrySet()) {
-                            System.out.println(entry.getKey() + " = " + entry.getValue());
+                            System.out.print(entry.getKey() + " = " + entry.getValue() + "    ");
+                            if (count == 3){
+                                System.out.println();
+                                count = 0;
+                            }
+                            count++;
                         }
                     }
                     else if (userIn[0].equals("s")){
@@ -281,7 +287,7 @@ public class emulate {
                             count = Integer.parseInt(userIn[1]);
                         }       
                     }
-                    System.out.println(userIn[1] + "instruction(s) completed.");
+                    System.out.println(userIn[1] + " instruction(s) completed.");
                 } else if (userIn.length == 3 && userIn[0].equals("m")){
                     // code for m num1 num2
                     int lower = Integer.parseInt(userIn[1]);
@@ -334,8 +340,15 @@ public class emulate {
                     }
                     else if (first.equals("d")){
                         // dump registers
+                        System.out.println("pc = " + pc);
+                        int count = 1;
                         for (Entry<String, Integer> entry : registers.entrySet()) {
-                            System.out.println(entry.getKey() + " = " + entry.getValue());
+                            System.out.print(entry.getKey() + " = " + entry.getValue() + "    ");
+                            if (count == 3){
+                                System.out.println();
+                                count = 0;
+                            }
+                            count++;
                         }
                     }
                     else if (first.equals("s")){
@@ -391,7 +404,7 @@ public class emulate {
                             count = instrNum;
                         }       
                     }
-                    System.out.println(instrNum + "instruction(s) completed.");
+                    System.out.println(instrNum + " instruction(s) completed.");
                 }
                 else if(lines.get(i).size() == 3 && lines.get(i).get(0).equals("m")){
                     int lower = Integer.parseInt(lines.get(i).get(1));

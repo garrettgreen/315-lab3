@@ -38,8 +38,6 @@ public class instrOp {
         String arr[] = instruction.trim().split("\\s+");
         String instName = arr[0];
 
-        System.out.println("This is the instr going to be compelte: " + arr[0]);
-
         if (instName.equals("add")){
             String destination = arr[1];
             int reg1 = get_register(arr[2]);
