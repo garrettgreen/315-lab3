@@ -1,3 +1,4 @@
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -104,21 +105,21 @@ public class instrOp {
             int offset = Integer.parseInt(arr[2]);
             String reg1 = arr[3];
             int memoryLoc = get_register(reg1) + offset;
-            emulate.datamemory[memoryLoc] = value; 
+            lab3.datamemory[memoryLoc] = value; 
         }
         else if (instName.equals("lw")){
             String destination = arr[1];
             int offset = Integer.parseInt(arr[2]);
             String reg1 = arr[3];
             int memoryLoc = get_register(reg1) + offset;
-            int value = emulate.datamemory[memoryLoc];
+            int value = lab3.datamemory[memoryLoc];
             set_register(destination, value);
         }
         else if (instName.equals("bne")){
             int reg1 = get_register(arr[1]);
             int reg2 = get_register(arr[2]);
             if (reg1 != reg2){
-                emulate.pc = labelMap.get(arr[3]) - 1; // -1 because completing this instruction pc++
+                lab3.pc = labelMap.get(arr[3]) - 1; // -1 because completing this instruction pc++
             }
 
         }
@@ -126,23 +127,23 @@ public class instrOp {
             int reg1 = get_register(arr[1]);
             int reg2 = get_register(arr[2]);
             if (reg1 == reg2){
-                emulate.pc = labelMap.get(arr[3]) - 1; // -1 because completing this instruction pc++
+                lab3.pc = labelMap.get(arr[3]) - 1; // -1 because completing this instruction pc++
             }
 
         }
         else if (instName.equals("j")){
             int address = labelMap.get(arr[1]);
-            emulate.pc = address - 1; // -1 because completing this instruction pc++
+            lab3.pc = address - 1; // -1 because completing this instruction pc++
         }
         else if (instName.equals("jr")){
             int address = get_register(arr[1]);
-            emulate.pc = address - 1; // -1 because completing this instruction pc++
+            lab3.pc = address - 1; // -1 because completing this instruction pc++
         }
         else if (instName.equals("jal")){
             int address = get_register(arr[1]);
             // set pc to $ra first, then set pc
-            set_register("$ra", emulate.pc);
-            emulate.pc = address - 1; // -1 because completing this instruction pc++
+            set_register("$ra", lab3.pc);
+            lab3.pc = address - 1; // -1 because completing this instruction pc++
         }
         
         return registers;
