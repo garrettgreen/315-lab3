@@ -137,10 +137,10 @@ public class instrOp {
         }
         else if (instName.equals("jr")){
             int address = get_register(arr[1]);
-            lab3.pc = address - 1; // -1 because completing this instruction pc++
+            lab3.pc = address; // -1 because completing this instruction pc++
         }
         else if (instName.equals("jal")){
-            int address = get_register(arr[1]);
+            int address = labelMap.get(arr[1]);
             // set pc to $ra first, then set pc
             set_register("$ra", lab3.pc);
             lab3.pc = address - 1; // -1 because completing this instruction pc++
